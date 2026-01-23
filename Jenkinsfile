@@ -1,41 +1,58 @@
 pipeline {
-    agent any // Run on any available executor
+    /* 'agent any' means this can run on any available build node. 
+       Since yours is a Windows machine, it will use the Windows CMD.
+    */
+    agent any 
 
     stages {
         stage('Checkout') {
             steps {
                 echo 'Pulling code from Git...'
-                // git 'https://github.com/user/repo.git'
+                // The 'checkout scm' step is handled automatically by Jenkins 
+                // when using a Pipeline from Git project.
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Compiling...'
-                sh 'make' // Execute a shell command
+                /* We use 'bat' because 'sh' does not exist on Windows by default.
+                   If you have a build tool like Maven or Gradle installed, 
+                   you would use 'bat "mvn clean package"' here.
+                */
+                bat 'echo Directory Listing:'
+                bat 'dir' 
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running Unit Tests...'
-                sh 'npm test'
+                // Example of a simulated test command
+                bat 'echo Running tests... Success!'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying to Production...'
+                echo 'Deploying to Environment...'
+                bat 'echo Deployment complete.'
             }
         }
     }
 
-    post { 
-        always { 
-            echo 'I will always run, regardless of success or failure!'
+    /* Post actions run after the stages. 
+       'always' runs regardless of success or failure.
+    */
+    post {
+        always {
+            echo 'Cleanup or Final Reporting...'
         }
         success {
-            echo 'Build passed!'
+            echo 'Build was successful! Sending notification...'
+        }
+        failure {
+            echo 'Build failed. Checking logs...'
         }
     }
 }
